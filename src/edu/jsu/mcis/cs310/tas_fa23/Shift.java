@@ -1,12 +1,11 @@
 package edu.jsu.mcis.cs310.tas_fa23;
 
-
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
 public class Shift {
-    private LocalDateTime shiftStart;
-    private LocalDateTime shiftStop;
+    private LocalTime shiftStart;
+    private LocalTime shiftStop;
     private int interval;
     private int gracePeriod;
     private int dock;
@@ -61,8 +60,12 @@ public class Shift {
     }
     @Override
     public String toString() {
-        return "Shift ID: " + id + "\nDescription: " + description + "\nInterval: " + interval
-                + "\nGrace Period: " + gracePeriod + "\nDock: " + dock + "\nLunch Deduct: " + lunchDeduct;
+        
+        StringBuilder result = new StringBuilder();
+        result.append("Shift " ).append(id).append(": ");
+        result.append(shiftStart).append(" ");
+
+        return result.toString();
     }
 }
 
