@@ -60,4 +60,34 @@ public class PunchDAO {
                                 event = EventType.TIME_OUT;
                                 break;
                         }
+             punch = new Punch(id, terminalId, badge, timestamp, event);
+        }
+       }
+      }
+        
+        } catch (SQLException e) {
+
+          throw new DAOException(e.getMessage());
+
+        } finally {
+
+          if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    throw new DAOException(e.getMessage());
+                }
+            }
+          
+          if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    throw new DAOException(e.getMessage());
+                }
+              }
+            }
+    
+          return punch;
+    }   
 }
