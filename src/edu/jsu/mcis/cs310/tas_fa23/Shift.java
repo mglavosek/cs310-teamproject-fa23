@@ -6,58 +6,33 @@ import java.time.temporal.ChronoUnit;
 public class Shift {
     private LocalTime shiftStart;
     private LocalTime shiftStop;
-    private int interval;
+    private LocalTime lunchStart;
+    private LocalTime lunchStop;
+    private int roundInterval;
     private int gracePeriod;
-    private int dock;
+    private int dockPenalty;
     private int id;
     private String description;
-    private int lunchDeduct;
+    private int lunchThreshhold;
  
 
     // Constructors, getters, and setters..
-    public Shift(int id, String description, int interval, int gracePeriod, int dock, int lunchDeduct) {
+    public Shift(int id, String description, LocalTime shiftStart, LocalTime shiftStop, int roundInterval, int gracePeriod, 
+            int dockPenalty, LocalTime lunchStart, LocalTime lunchStop, int lunchThreshold) {
+        
         this.id = id;
         this.description = description;
-        this.interval = interval;
+        this.shiftStart = shiftStart;
+        this.shiftStop = shiftStop;
+        this.roundInterval = roundInterval;
         this.gracePeriod = gracePeriod;
-        this.dock = dock;
-        this.lunchDeduct = lunchDeduct;
+        this.dockPenalty = dockPenalty;
+        this.lunchStart = lunchStart;
+        this.lunchStop = lunchStop;
+        this.lunchThreshhold = lunchThreshold;
 }
 
-
-    public LocalDateTime adjustClockInPunch(LocalDateTime punchTime) {
-        long minutesDifference = ChronoUnit.MINUTES.between(punchTime, shiftStart);
-
-        if (minutesDifference < -dock) {
-            return punchTime.plusMinutes(dock);
-        } else if (minutesDifference >= -dock && minutesDifference < -gracePeriod) {
-            return shiftStart;
-        } else if (minutesDifference >= -gracePeriod && minutesDifference < -interval) {
-            return shiftStart;
-        } else {
-            return roundPunch(punchTime);
-        }
-    }
-
-    public LocalDateTime adjustClockOutPunch(LocalDateTime punchTime) {
-        long minutesDifference = ChronoUnit.MINUTES.between(punchTime, shiftStop);
-
-        if (minutesDifference > dock) {
-            return punchTime.minusMinutes(dock);
-        } else if (minutesDifference <= dock && minutesDifference > gracePeriod) {
-            return shiftStop;
-        } else if (minutesDifference <= gracePeriod && minutesDifference > interval) {
-            return shiftStop;
-        } else {
-            return roundPunch(punchTime);
-        }
-    }
-
-    public LocalDateTime roundPunch(LocalDateTime punchTime) {
-        // Implement rounding logic based on the interval
-        return null;
-        // Implement rounding logic based on the interval
-    }
+    
     @Override
     public String toString() {
         
@@ -67,5 +42,47 @@ public class Shift {
 
         return result.toString();
     }
+
+    public LocalTime getShiftStart() {
+        return shiftStart;
+    }
+
+    public LocalTime getShiftStop() {
+        return shiftStop;
+    }
+
+    public LocalTime getLunchStart() {
+        return lunchStart;
+    }
+
+    public LocalTime getLunchStop() {
+        return lunchStop;
+    }
+
+    public int getRoundInterval() {
+        return roundInterval;
+    }
+
+    public int getGracePeriod() {
+        return gracePeriod;
+    }
+
+    public int getDockPenalty() {
+        return dockPenalty;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getLunchThreshhold() {
+        return lunchThreshhold;
+    }
 }
+
+
 

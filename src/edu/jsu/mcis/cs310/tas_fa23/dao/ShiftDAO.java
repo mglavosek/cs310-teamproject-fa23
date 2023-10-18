@@ -3,6 +3,7 @@ package edu.jsu.mcis.cs310.tas_fa23.dao;
 import edu.jsu.mcis.cs310.tas_fa23.Shift;
 import edu.jsu.mcis.cs310.tas_fa23.Badge;
 import edu.jsu.mcis.cs310.tas_fa23.Badge;
+import edu.jsu.mcis.cs310.tas_fa23.Employee;
 import edu.jsu.mcis.cs310.tas_fa23.Shift;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,17 +12,22 @@ import java.sql.SQLException;
 
 public class ShiftDAO {
 
+    private static final String QUERY_FIND_SHIFT = "SELECT * FROM shift WHERE id = ?";
+    
     private final Connection conn;
+    private final DAOFactory daoFactory;
 
-    public ShiftDAO(DAOFactory daoFactory) {
-    this.conn = daoFactory.getConnection();
-}
+    ShiftDAO(DAOFactory daoFactory) 
+    {
+        this.daoFactory = daoFactory;
+    }
 
 
     public Shift find(int id) {
+        
+        Shift shift = null;
         try {
-            String query = "SELECT * FROM shift WHERE id = ?";
-            PreparedStatement statement = conn.prepareStatement(query);
+            PreparedStatement statement = conn.prepareStatement(QUERY_FIND_SHIFT);
             statement.setInt(1, id);
             ResultSet result = statement.executeQuery();
 
@@ -32,7 +38,7 @@ public class ShiftDAO {
                 int dock = result.getInt("dock");
                 int lunchDeduct = result.getInt("lunchdeduct");
 
-                return new Shift(id, description, interval, gracePeriod, dock, lunchDeduct);
+                shift = new Shift(id, description, interval, gracePeriod, dock, lunchDeduct);
             } else{
               System.out.println("Shift not found with id: ");
             return null;}
@@ -43,33 +49,28 @@ public class ShiftDAO {
         return null;
     }
 
-    public Shift find(Badge badge) {
+    public int find(Badge badge) {
+        
+        int result;
         try {
-            String query = "SELECT s.id, s.description, s.interval, s.graceperiod, s.dock, s.lunchdeduct " +
-                "FROM shift s " +
-                "JOIN employee e ON s.id = e.shiftid " +
-                "WHERE e.badgeid = ?";
-
-            PreparedStatement statement = conn.prepareStatement(query);
+            PreparedStatement statement = conn.prepareStatement();
             statement.setString(1, badge.getId());
-            ResultSet result = statement.executeQuery();
+            ResultSet rs = statement.executeQuery();
 
-            if (result.next()) {
-                int id = result.getInt("id");
-                String description = result.getString("description");
-                int interval = result.getInt("interval");
-                int gracePeriod = result.getInt("graceperiod");
-                int dock = result.getInt("dock");
-                int lunchDeduct = result.getInt("lunchdeduct");
-
-                return new Shift(id, description, interval, gracePeriod, dock, lunchDeduct);
-            } else{
-              System.out.println("Shift not found with id: ");
-            return null;}
+            if (rs.next()) {
+                
+                BadgeDAO badgeDao = daoFactory.getBadgeDAO();
+                Badge badge = badgeDao.find(rs.getString("badgeid"));
+                
+                EmployeeDAO employeeDao = daoFactory.getEmployeeDAO();
+                Employee employee = employeeDao.find(badge);
+                result = employee.getShiftId();
+                
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return null;
+        return result;
     }
 }
