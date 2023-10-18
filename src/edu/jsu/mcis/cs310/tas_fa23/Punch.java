@@ -28,6 +28,17 @@ public class Punch {
         this.originaltimestamp = originaltimestamp;
         this.punchType = punchType;      
 }
+  public void adjust(Shift s){
+        //variables
+        Punch unadjustedPunch=null;
+        EventType EventType=null;
+        s = null;
+        EventType AdjustmentType=null;
+        
+        //Find what kind of shift it is , then
+        
+      
+  }
   
   public int getId() {
         return id;
