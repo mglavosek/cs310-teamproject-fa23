@@ -71,19 +71,19 @@ public class Employee {
         return active;
     }
     
-    public Badge getBadgeId(){
+    public Badge getBadge(){
         return badge;
     }
     
-    public Department getDepartmentId(){
+    public Department getDepartment(){
         return department;
     }
     
-    public Shift getShiftId(){
+    public Shift getShift(){
         return shift;
     }
     
-    public EmployeeType getEmployeeTypeId(){
+    public EmployeeType getEmployeeType(){
         return employeeType;
     }
 

@@ -2,6 +2,7 @@ package edu.jsu.mcis.cs310.tas_fa23;
 
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 
 public class Shift {
     private LocalTime shiftStart;
@@ -17,30 +18,32 @@ public class Shift {
  
 
     // Constructors, getters, and setters..
-    public Shift(int id, String description, LocalTime shiftStart, LocalTime shiftStop, int roundInterval, int gracePeriod, 
-            int dockPenalty, LocalTime lunchStart, LocalTime lunchStop, int lunchThreshold) {
+    public Shift(HashMap shiftHash) {
         
-        this.id = id;
-        this.description = description;
-        this.shiftStart = shiftStart;
-        this.shiftStop = shiftStop;
-        this.roundInterval = roundInterval;
-        this.gracePeriod = gracePeriod;
-        this.dockPenalty = dockPenalty;
-        this.lunchStart = lunchStart;
-        this.lunchStop = lunchStop;
-        this.lunchThreshhold = lunchThreshold;
+        this.id = Integer.parseInt((String)shiftHash.get("id"));
+        this.description = (String)shiftHash.get("description");
+        this.shiftStart = LocalTime.parse((CharSequence)shiftHash.get("shiftstart"));
+        this.shiftStop = LocalTime.parse((CharSequence)shiftHash.get("shiftstop"));
+        this.roundInterval = Integer.parseInt((String)shiftHash.get("roundinterval"));
+        this.gracePeriod = Integer.parseInt((String)shiftHash.get("graceperiod"));
+        this.dockPenalty = Integer.parseInt((String)shiftHash.get("dockpenalty"));
+        this.lunchStart = LocalTime.parse((CharSequence)shiftHash.get("lunchstart"));
+        this.lunchStop = LocalTime.parse((CharSequence)shiftHash.get("lunchstop"));
+        this.lunchThreshhold = Integer.parseInt((String)shiftHash.get("lunchthreshold"));
 }
 
-    
+    //"Shift 1: 07:00 - 15:30 (510 minutes); Lunch: 12:00 - 12:30 (30 minutes)"
     @Override
     public String toString() {
         
-        StringBuilder result = new StringBuilder();
-        result.append("Shift " ).append(id).append(": ");
-        result.append(shiftStart).append(" ");
+        StringBuilder s = new StringBuilder();
+        s.append(description).append(": ");
+        s.append(shiftStart).append(" - ").append(shiftStop);
+        s.append(" (").append(ChronoUnit.MINUTES.between(shiftStart, shiftStop)).append(" minutes); Lunch: ");
+        s.append(lunchStart).append(" - ").append(lunchStop).append(" (");
+        s.append(ChronoUnit.MINUTES.between(lunchStart, lunchStop)).append(" minutes)");
 
-        return result.toString();
+        return s.toString();
     }
 
     public LocalTime getShiftStart() {
