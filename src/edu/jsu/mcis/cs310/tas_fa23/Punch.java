@@ -71,4 +71,16 @@ public class Punch {
 
         return s.toString();
     }
+   
+   public String printAdjusted() {
+        StringBuilder s = new StringBuilder();
+
+        s.append("#").append(badge.getId()).append(" ");
+        s.append(punchType.toString()).append(": ");
+        
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E MM/dd/yyyy HH:mm:ss");
+         s.append(adjustedTimeStamp.format(formatter).toUpperCase());
+
+        return s.toString();
+   }
 }
