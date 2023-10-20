@@ -7,19 +7,20 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 public class Punch {
-    private final int terminalid;
-    private int id;
+    private final Integer terminalid;
+    private Integer id;
     private final EventType punchType;
     private final Badge badge;
-    private LocalDateTime originaltimestamp = null;
+    private LocalDateTime originalTimeStamp = null;
     private final LocalDateTime adjustedTimeStamp = null;
     private PunchAdjustmentType adjustmentType = null;
     
     
- public Punch(int terminalid, Badge badge, EventType punchType) {
+ public Punch(Integer terminalid, Badge badge, EventType punchType) {
         this.terminalid = terminalid;
         this.badge = badge;
         this.punchType = punchType;
+        this.originalTimeStamp = LocalDateTime.now();
     }
  
  
@@ -27,13 +28,13 @@ public class Punch {
         this.id = id;
         this.terminalid = terminalid;
         this.badge = badge;
-        this.originaltimestamp = originaltimestamp;
+        this.originalTimeStamp = originaltimestamp;
         this.punchType = punchType;      
 }
   public void adjust(Shift s){
         //variables
        
-        LocalDateTime ots = originaltimestamp;
+        LocalDateTime ots = originalTimeStamp;
         LocalTime shiftstart = s.getShiftStart();
         LocalTime shiftstop = s.getShiftStop();
         LocalTime lunchstart = s.getLunchStart();
@@ -43,7 +44,7 @@ public class Punch {
         int dockPenalty = s.getDockPenalty();
         int minutesOver = ots.getMinute() % roundInterval;
         
-        //Find what kind of shift it is , then
+        //Find what kind of shift it is, then
         
         boolean isWeekday = (ots.getDayOfWeek() != DayOfWeek.SATURDAY && ots.getDayOfWeek() != DayOfWeek.SUNDAY);
         boolean isNotTimeout = punchType != EventType.TIME_OUT;
@@ -79,7 +80,7 @@ public class Punch {
     }
   
   public LocalDateTime getOriginalTimeStamp() {
-        return this.originaltimestamp;
+        return this.originalTimeStamp;
     }
    
   public EventType getPunchType() {
@@ -93,11 +94,14 @@ public class Punch {
           s.append(punchType.toString()).append(": ");
           
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E MM/dd/yyyy HH:mm:ss");
-        s.append(originaltimestamp.format(formatter).toUpperCase());
+        s.append(originalTimeStamp.format(formatter).toUpperCase());
 
         return s.toString();
     }
    
+   
+   //#28DC3FB8 CLOCK IN: FRI 09/07/2018 06:50:35
+   //#28DC3FB8 CLOCK IN: FRI 09/07/2018 07:00:00 (Shift Start)
    public String printAdjusted() {
         StringBuilder s = new StringBuilder();
 
@@ -106,7 +110,6 @@ public class Punch {
         
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E MM/dd/yyyy HH:mm:ss");
         s.append(adjustedTimeStamp.format(formatter).toUpperCase());
-        s.append()
 
         return s.toString();
    }
