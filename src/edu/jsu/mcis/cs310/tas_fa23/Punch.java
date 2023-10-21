@@ -1,6 +1,8 @@
 
 package edu.jsu.mcis.cs310.tas_fa23;
-
+import edu.jsu.mcis.cs310.tas_fa23.Shift;
+import edu.jsu.mcis.cs310.tas_fa23.dao.DAOFactory;
+import edu.jsu.mcis.cs310.tas_fa23.dao.ShiftDAO;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.DayOfWeek;
@@ -32,8 +34,16 @@ public class Punch {
         this.punchType = punchType;      
 }
   public void adjust(Shift s){
-        //variables
-       
+        //connecting to shift dao
+        DAOFactory daoFactory = new DAOFactory("tas.jdbc");
+        ShiftDAO ShiftDao = daoFactory.getShiftDAO();
+        
+        //get shift DAO
+        
+        //s=ShiftDAO.find(Something that traverses and reads all the shifts);
+        
+        
+        
         LocalDateTime ots = originalTimeStamp;
         LocalTime shiftstart = s.getShiftStart();
         LocalTime shiftstop = s.getShiftStop();
@@ -113,4 +123,3 @@ public class Punch {
 
         return s.toString();
    }
-}
