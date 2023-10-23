@@ -5,11 +5,15 @@ import edu.jsu.mcis.cs310.tas_fa23.Punch;
 import edu.jsu.mcis.cs310.tas_fa23.EventType;
 import java.time.LocalDateTime;
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 
 public class PunchDAO {
     
    private static final String QUERY_FIND = "SELECT * FROM event WHERE id = ?";
+   private static final String QUERY_FIND_LIST = "SELECT * FROM event WHERE badgeid = ? AND (timestamp LIKE ? OR timestamp LIKE ?) ORDER BY timestamp";
 
    private final DAOFactory daoFactory;
    
@@ -44,7 +48,9 @@ public class PunchDAO {
 
                     LocalDateTime timestamp = rs.getTimestamp("timestamp").toLocalDateTime();
                     int terminalId = rs.getInt("terminalid");
-                    Badge badge = new Badge(rs.getString("badgeid"),null);
+                    
+                    BadgeDAO badgeDao = daoFactory.getBadgeDAO();
+                    Badge badge = badgeDao.find(rs.getString("badgeid"));
 
                      EventType event = null;
          
@@ -89,5 +95,70 @@ public class PunchDAO {
             }
     
           return punch;
-    }   
+    }  
+    
+    
+    public ArrayList list(Badge badgeQ, LocalDate date){
+        
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        ArrayList<Punch> punchList = new ArrayList();
+        
+        try {
+
+            Connection conn = daoFactory.getConnection();
+        
+            if (conn.isValid(0)) {
+                
+                String date1 = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "%";
+                String date2 = date.plusDays(1).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "%";
+                
+                ps = conn.prepareStatement(QUERY_FIND_LIST);
+                ps.setString(1, badgeQ.getId());
+                ps.setString(2,date1);
+                ps.setString(3,date2);
+
+                boolean hasresults = ps.execute();
+
+                if (hasresults) {
+
+                    rs = ps.getResultSet();
+                    
+                    while (rs.next()) {
+                        
+                            
+                            //if it isn't a clock out on the next day, stop. 
+                            if((rs.getInt("eventtypeid") == 1) && (date.getDayOfMonth() != rs.getTimestamp("timestamp").toLocalDateTime().getDayOfMonth())){
+                                break;
+                            }
+                            
+                            int id = rs.getInt("id");
+                            Punch punch = (find(id));
+                            
+                            punchList.add(punch);
+
+                    }
+                }
+            }
+        } catch (SQLException e) {
+          throw new DAOException(e.getMessage());
+        } finally {
+          if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    throw new DAOException(e.getMessage());
+                }
+            }
+          if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    throw new DAOException(e.getMessage());
+                }
+            }
+        }
+        return punchList;
+    }
+    
 }

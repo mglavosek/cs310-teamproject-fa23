@@ -24,11 +24,11 @@ public class Punch {
     }
  
  
-  public Punch(int id, int terminalid, Badge badge, LocalDateTime originaltimestamp, EventType punchType) {
+  public Punch(int id, int terminalid, Badge badge, LocalDateTime originalTimeStamp, EventType punchType) {
         this.id = id;
         this.terminalid = terminalid;
         this.badge = badge;
-        this.originalTimeStamp = originaltimestamp;
+        this.originalTimeStamp = originalTimeStamp;
         this.punchType = punchType;      
 }
   public void adjust(Shift s){
