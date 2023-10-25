@@ -1,6 +1,7 @@
 
 package edu.jsu.mcis.cs310.tas_fa23;
 
+import static edu.jsu.mcis.cs310.tas_fa23.PunchAdjustmentType.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.DayOfWeek;
@@ -13,7 +14,7 @@ public class Punch {
     private final Badge badge;
     private LocalDateTime originalTimeStamp = null;
     private final LocalDateTime adjustedTimeStamp = null;
-    private PunchAdjustmentType adjustmentType = null;
+    private PunchAdjustmentType adjustmentType = NONE;
     
     
  public Punch(Integer terminalid, Badge badge, EventType punchType) {
@@ -86,6 +87,16 @@ public class Punch {
   public EventType getPunchType() {
         return this.punchType;
     }
+
+    public PunchAdjustmentType getAdjustmentType() {
+        return adjustmentType;
+    }
+
+    public LocalDateTime getAdjustedTimeStamp() {
+        return adjustedTimeStamp;
+    }
+  
+  
   
   
    public String printOriginal() {
