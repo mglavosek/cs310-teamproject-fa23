@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
 
@@ -98,7 +99,7 @@ public class PunchDAO {
     }  
     
     
-    public ArrayList list(Badge badgeQ, LocalDate date){
+    public ArrayList<Punch> list(Badge badgeQ, LocalDate date){
         
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -160,5 +161,45 @@ public class PunchDAO {
         }
         return punchList;
     }
+    
+    
+    
+    
+    public ArrayList<Punch> list(Badge badgeQ, LocalDate dateStart, LocalDate dateEnd){
+        
+        ArrayList<Punch> punchList = new ArrayList();
+        
+        
+        try {
+            
+            //Quickly handles accidental single day Queries
+            if(dateStart.isEqual(dateEnd)){
+                punchList.addAll(list(badgeQ,dateStart));
+                return punchList;
+            }
+            
+            if(dateStart.isAfter(dateEnd)){
+                LocalDate tempDate = dateStart;
+                dateStart = dateEnd;
+                dateEnd = tempDate;
+                tempDate = null;
+            }
+            
+            
+            int days = (int) ChronoUnit.DAYS.between(dateStart, dateEnd);
+            LocalDate tempDate = dateStart;
+            
+            while(!tempDate.isAfter(dateEnd)){
+                punchList.addAll(list(badgeQ,tempDate));
+                tempDate = tempDate.plusDays(1);
+            }
+            
+        } catch (Exception e) {
+            throw new DAOException(e.getMessage());
+        }
+        return punchList;
+    }
+    
+    
     
 }

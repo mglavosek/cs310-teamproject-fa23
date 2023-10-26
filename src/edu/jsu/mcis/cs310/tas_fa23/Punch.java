@@ -6,7 +6,7 @@ import edu.jsu.mcis.cs310.tas_fa23.dao.ShiftDAO;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.DayOfWeek;
-import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 
 public class Punch {
     private final Integer terminalid;
@@ -15,7 +15,7 @@ public class Punch {
     private final Badge badge;
     private LocalDateTime originalTimeStamp = null;
     private final LocalDateTime adjustedTimeStamp = null;
-    private PunchAdjustmentType adjustmentType = null;
+    private PunchAdjustmentType adjustmentType = NONE;
     
     
  public Punch(Integer terminalid, Badge badge, EventType punchType) {
@@ -54,25 +54,16 @@ public class Punch {
         int dockPenalty = s.getDockPenalty();
         int minutesOver = ots.getMinute() % roundInterval;
         
-        //Find what kind of shift it is, then
+        ////checks
         
-        boolean isWeekday = (ots.getDayOfWeek() != DayOfWeek.SATURDAY && ots.getDayOfWeek() != DayOfWeek.SUNDAY);
-        boolean isNotTimeout = punchType != EventType.TIME_OUT;
+        //compare clock in, check grace period
+        if(this.getPunchType() == CLOCK_IN){
+            
+            if (shiftGrace){
+                
+            }
+        }
         
-        LocalDateTime shiftStart = ots.with(shiftstart);
-        LocalDateTime shiftStartGraceBefore = shiftStart.minusMinutes(gracePeriod);
-        LocalDateTime shiftStartGraceAfter = shiftStart.plusMinutes(gracePeriod);
-        LocalDateTime shiftStop = ots.with(shiftstop);
-        
-        LocalDateTime shiftStopGrace = shiftStop.minusMinutes(gracePeriod);
-
-        LocalDateTime shiftStopInterval = shiftStop.plusMinutes(roundInterval);
-
-        LocalDateTime lunchStart = ots.with(lunchstart);
-        LocalDateTime lunchStop = ots.with(lunchstop);
-
-        LocalDateTime shiftStartDock = shiftStart.withMinute(shiftStart.getMinute()).plusMinutes(dockPenalty);
-        LocalDateTime shiftStopDock = shiftStop.withMinute(shiftStop.getMinute()).minusMinutes(dockPenalty);
         
       
   }
@@ -96,6 +87,16 @@ public class Punch {
   public EventType getPunchType() {
         return this.punchType;
     }
+
+    public PunchAdjustmentType getAdjustmentType() {
+        return adjustmentType;
+    }
+
+    public LocalDateTime getAdjustedTimeStamp() {
+        return adjustedTimeStamp;
+    }
+  
+  
   
   
    public String printOriginal() {
