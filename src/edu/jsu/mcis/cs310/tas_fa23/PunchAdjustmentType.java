@@ -9,7 +9,7 @@ public enum PunchAdjustmentType {
     LUNCH_START("Lunch Start"),
     LUNCH_STOP("Lunch Stop"),
     INTERVAL_ROUND("Interval Round");
-
+     
     private final String description;
 
     private PunchAdjustmentType(String d) {

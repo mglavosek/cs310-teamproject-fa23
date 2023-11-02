@@ -53,6 +53,7 @@ public class Punch {
         int adjustedminute;
         LocalDateTime firstClockInDock=shiftstart.plusMinutes(roundInterval);
         LocalDateTime firstClockOutDock=shiftstop.minusMinutes(roundInterval);
+        
 
         ////checks
         if (this.getPunchType() == CLOCK_IN) {
@@ -113,8 +114,18 @@ public class Punch {
             adjustmentType=PunchAdjustmentType.SHIFT_DOCK;
             
             }
-            //further interval round post the initial dock penalty
-            
+            //further interval round post the initial dock penalty(this is rounding down)
+            else if((originalTimeStamp.isBefore(firstClockOutDock)) && ((minutes % roundInterval)<(roundInterval/2))){
+                adjustedminute = Math.round(minutes / roundInterval) * roundInterval;
+                 shiftstop = originalTimeStamp.minusMinutes(adjustedminute);
+                
+            }
+            //further interval round post the initial dock penalty(this is rounding up)
+            else if((originalTimeStamp.isBefore(firstClockOutDock)) && ((minutes % roundInterval)>(roundInterval/2))){
+                adjustedminute = Math.round(minutes / roundInterval) * roundInterval;
+                 shiftstop = originalTimeStamp.plusMinutes(adjustedminute);
+                
+            }
         }
     }
         

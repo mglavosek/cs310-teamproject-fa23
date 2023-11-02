@@ -105,10 +105,10 @@ public class PunchAdjustTest {
         
         assertEquals("#08D01475 CLOCK IN: TUE 09/18/2018 11:59:33", p1.printOriginal());
         assertEquals("#08D01475 CLOCK IN: TUE 09/18/2018 12:00:00 (Shift Start)", p1.printAdjusted());
-
+        
         assertEquals("#08D01475 CLOCK OUT: TUE 09/18/2018 21:30:27", p2.printOriginal());
         assertEquals("#08D01475 CLOCK OUT: TUE 09/18/2018 21:30:00 (None)", p2.printAdjusted());
-
+ 
     }
 
     @Test
