@@ -191,5 +191,48 @@ public class PunchAdjustTest {
         assertEquals("#ADD650A8 CLOCK OUT: TUE 09/11/2018 15:30:00 (Shift Stop)", p7.printAdjusted());
 
     }
+    @Test
+    public void testAdjustPunchesShift1IntervalRound() {
+         /* Get Shift Ruleset and Punch Data */
+        
+        PunchDAO punchDAO = daoFactory.getPunchDAO();
+        ShiftDAO shiftDAO = daoFactory.getShiftDAO();
+        Shift s1 = shiftDAO.find(1);
 
+        Punch p1 = punchDAO.find(172);
+        Punch p2 = punchDAO.find(834);
+      
+    /* Adjust Punches According to Shift Ruleset */ 
+        p1.adjust(s1);
+        p2.adjust(s1);
+
+        assertEquals("#D2C39273 CLOCK OUT: WED 08/01/2018 06:56:29", p1.printOriginal());
+        assertEquals("#D2C39273 CLOCK OUT: WED 08/01/2018 07:00:00 (Interval Round)", p1.printAdjusted());
+
+        assertEquals("#D2C39273 CLOCK OUT: THU 08/09/2018 06:15:10", p2.printOriginal());
+        assertEquals("#D2C39273 CLOCK OUT: THU 08/09/2018 06:15:00 (Interval Round)", p2.printAdjusted()); 
+
+        
+    }
+     @Test
+    public void testAdjustPunchesShift2ShiftDock() {
+        // Get Shift Ruleset and Punch Data
+        PunchDAO punchDAO = daoFactory.getPunchDAO();
+        ShiftDAO shiftDAO = daoFactory.getShiftDAO();
+
+        Shift s2 = shiftDAO.find(2);
+        
+         Punch p1 = punchDAO.find(1168);
+         Punch p2 = punchDAO.find(1080);
+
+         /* Adjust Punches According to Shift Ruleset */ 
+        p1.adjust(s2);
+        p2.adjust(s2);
+        
+          assertEquals("#D2C39273 CLOCK OUT: SAT 08/11/2018 22:11:30", p1.printOriginal());
+        assertEquals("#D2C39273 CLOCK OUT: SAT 08/11/2018 22:15:00 (Shift Dock)", p1.printAdjusted());
+
+        assertEquals("#D2C39273 CLOCK OUT: SAT 08/11/2018  00:12:35", p2.printOriginal());
+        assertEquals("#D2C39273 CLOCK OUT: SAT 08/11/2018 00:12:00 (Shift Dock)", p2.printAdjusted()); 
+    }
 }
