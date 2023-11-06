@@ -3,16 +3,8 @@ package edu.jsu.mcis.cs310.tas_fa23;
 import static edu.jsu.mcis.cs310.tas_fa23.EventType.*;
 import static edu.jsu.mcis.cs310.tas_fa23.PunchAdjustmentType.*;
 import edu.jsu.mcis.cs310.tas_fa23.Shift;
-import edu.jsu.mcis.cs310.tas_fa23.dao.BadgeDAO;
-import edu.jsu.mcis.cs310.tas_fa23.dao.DAOFactory;
-import edu.jsu.mcis.cs310.tas_fa23.dao.EmployeeDAO;
-import edu.jsu.mcis.cs310.tas_fa23.dao.PunchDAO;
-import edu.jsu.mcis.cs310.tas_fa23.dao.ShiftDAO;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit.*;
 import java.time.format.DateTimeFormatter;
-import java.time.DayOfWeek;
-import java.time.LocalTime;
 import static java.time.temporal.ChronoUnit.MINUTES;
 
 public class Punch {
@@ -42,93 +34,83 @@ public class Punch {
 
     public void adjust(Shift s) {
         LocalDateTime ots = originalTimeStamp;
-        LocalDateTime shiftstart = originalTimeStamp.toLocalDate().atTime(s.getShiftStart());
-        LocalDateTime shiftstop = originalTimeStamp.toLocalDate().atTime(s.getShiftStop());
-        LocalDateTime lunchstart = originalTimeStamp.toLocalDate().atTime(s.getLunchStart());
-        LocalDateTime lunchstop = originalTimeStamp.toLocalDate().atTime(s.getLunchStop());
+        LocalDateTime shiftstart = originalTimeStamp.toLocalDate().atTime(s.getShiftStart()).withSecond(0).withNano(0);
+        LocalDateTime shiftstop = originalTimeStamp.toLocalDate().atTime(s.getShiftStop()).withSecond(0).withNano(0);
+        LocalDateTime lunchstart = originalTimeStamp.toLocalDate().atTime(s.getLunchStart()).withSecond(0).withNano(0);
+        LocalDateTime lunchstop = originalTimeStamp.toLocalDate().atTime(s.getLunchStop()).withSecond(0).withNano(0);
         int roundInterval = s.getRoundInterval();
         int gracePeriod = s.getGracePeriod();
         int dockPenalty = s.getDockPenalty();
         int minutes = originalTimeStamp.getMinute();
         int adjustedminute;
-        LocalDateTime firstClockInDock=shiftstart.plusMinutes(roundInterval);
-        LocalDateTime firstClockOutDock=shiftstop.minusMinutes(roundInterval);
-        
+        LocalDateTime firstClockInDock = shiftstart.plusMinutes(dockPenalty);
+        LocalDateTime firstClockOutDock = shiftstop.minusMinutes(dockPenalty);
 
         ////checks
         if (this.getPunchType() == CLOCK_IN) {
-// interval round up to shift start
-            if (MINUTES.between(originalTimeStamp, shiftstart) < roundInterval && originalTimeStamp.isBefore(shiftstart)) {
+            ///check if within Grace period (shift start)
+            if (originalTimeStamp.isAfter(shiftstart) && originalTimeStamp.isBefore(shiftstart.plusMinutes(gracePeriod))) {
                 adjustedTimeStamp = shiftstart;
                 adjustmentType = PunchAdjustmentType.SHIFT_START;
-            }
-            //Within Grace Period (round down to shift start
-            else if (MINUTES.between(originalTimeStamp, shiftstart) < gracePeriod && originalTimeStamp.isAfter(shiftstart)) {
-                adjustedTimeStamp = shiftstart;
-                adjustmentType = PunchAdjustmentType.SHIFT_START;
-            } 
-             
-            //Clock in Dock Penalty for clocking in after graceperiod
-            else if (MINUTES.between(originalTimeStamp, shiftstart) > gracePeriod && originalTimeStamp.isAfter(shiftstart)) {
-                adjustedTimeStamp = shiftstart;
+
+            } //check if within initial round interval (right) (dock penalty)
+            else if (originalTimeStamp.isAfter(shiftstart.plusMinutes(gracePeriod)) && originalTimeStamp.isBefore(firstClockInDock)) {
+                adjustedTimeStamp = firstClockInDock;
                 adjustmentType = PunchAdjustmentType.SHIFT_DOCK;
-            } 
-            //interval rounding UP to nearest increment
-            else if (MINUTES.between(originalTimeStamp, shiftstart) > MINUTES.between(originalTimeStamp, shiftstart.plusMinutes(dockPenalty)) && (MINUTES.between(originalTimeStamp, shiftstart) / roundInterval) >= roundInterval / 2) {
-                adjustedminute = Math.round(minutes / roundInterval) * roundInterval;
-                 shiftstart = originalTimeStamp.plusMinutes(adjustedminute); 
-                adjustmentType = PunchAdjustmentType.INTERVAL_ROUND;
-            }
-            //interval rounding down to nearest increment
-            else if (MINUTES.between(originalTimeStamp, shiftstart) > MINUTES.between(originalTimeStamp, shiftstart.plusMinutes(dockPenalty)) && (MINUTES.between(originalTimeStamp, shiftstart) / roundInterval) < roundInterval / 2) {
-                adjustedminute = Math.round(minutes / roundInterval) * roundInterval;
-                shiftstart = originalTimeStamp.minusMinutes(adjustedminute);
-                adjustmentType = PunchAdjustmentType.INTERVAL_ROUND;
-            } 
-            //lunch clock in , needs fixing
-            else if (MINUTES.between(originalTimeStamp, shiftstart) > (MINUTES.between(originalTimeStamp, lunchstart))) {
+            } //checking for round interval before lunch start 
+            // will need to go up/down rounding
+            // maybe give a lunch grace so it will only interval round if it is not within 1 (graceperiod) or (round interval 
+            else if (originalTimeStamp.isAfter(firstClockInDock) && originalTimeStamp.isBefore(lunchstart)) {
+                //round up
+                if ((MINUTES.between(originalTimeStamp, shiftstart) / roundInterval) >= roundInterval / 2) {
+                    adjustedminute = Math.round(minutes / roundInterval) * roundInterval;
+                    adjustedTimeStamp = originalTimeStamp.plusMinutes(adjustedminute);
+                    adjustmentType = PunchAdjustmentType.INTERVAL_ROUND;
+
+                } //rounding down    
+                else if ((MINUTES.between(originalTimeStamp, shiftstart) / roundInterval) < roundInterval / 2) {
+                    adjustedminute = Math.round(minutes / roundInterval) * roundInterval;
+                    adjustedTimeStamp = originalTimeStamp.minusMinutes(adjustedminute);
+                    adjustmentType = PunchAdjustmentType.INTERVAL_ROUND;
+                }
+            } //check if it is lunch start (lunch start)
+            else if (originalTimeStamp.isAfter(lunchstart) && originalTimeStamp.isBefore(lunchstop)) {
+                adjustedTimeStamp = lunchstart;
+                adjustmentType = PunchAdjustmentType.LUNCH_START;
+            } //create a new set of rounding up and down intervals for after lunch ? (issue is that it is currently only applying rounding adjustments to timestamps BEFORE lunch , not after.
+            else if (originalTimeStamp.isAfter(lunchstop) && originalTimeStamp.isBefore(shiftstop.minusMinutes(dockPenalty))) {
+                //round up
+                if ((MINUTES.between(originalTimeStamp, shiftstart) / roundInterval) >= roundInterval / 2) {
+                    adjustedminute = Math.round(minutes / roundInterval) * roundInterval;
+                    adjustedTimeStamp = originalTimeStamp.plusMinutes(adjustedminute);
+                    adjustmentType = PunchAdjustmentType.INTERVAL_ROUND;
+
+                } //rounding down    
+                else if ((MINUTES.between(originalTimeStamp, shiftstart) / roundInterval) < roundInterval / 2) {
+                    adjustedminute = Math.round(minutes / roundInterval) * roundInterval;
+                    adjustedTimeStamp = originalTimeStamp.minusMinutes(adjustedminute);
+                    adjustmentType = PunchAdjustmentType.INTERVAL_ROUND;
+                }
+
+            } //if the time stamp does not apply to any set of conditionals
+            else {
+                if (originalTimeStamp.getSecond() >= 30) {
+                    //rounding up to the nearest minute 
+                    adjustedTimeStamp = originalTimeStamp.plusMinutes(1).withSecond(0).withNano(0);
+                    adjustmentType = PunchAdjustmentType.NONE;
+                } else if (originalTimeStamp.getSecond() < 30) {
+                    //rounding down to the nearest minute
+                    adjustedTimeStamp = originalTimeStamp.withSecond(0).withNano(0);
+                    adjustmentType = PunchAdjustmentType.NONE;
+
+                }
 
             }
-            //no adjustment needed as it is either at the time of shift start or falls at an incremment of the round interval
-            else if ((MINUTES.between(originalTimeStamp, shiftstart) % roundInterval == 0) && (originalTimeStamp.isAfter(shiftstart))) {
-                originalTimeStamp = shiftstart;
-                adjustmentType = PunchAdjustmentType.SHIFT_START;
-            }
-            
+
         }
-        else if (this.getPunchType() == CLOCK_OUT) {
-            //interval Round down to shift stop
-            if (MINUTES.between(originalTimeStamp, shiftstop) < gracePeriod && originalTimeStamp.isBefore(shiftstop)) {
-                
-                adjustedTimeStamp = shiftstop;
-                adjustmentType = PunchAdjustmentType.SHIFT_STOP;
-            }
-            //within grace period round up to shiftstop
-            else if((MINUTES.between(originalTimeStamp,shiftstop)<gracePeriod) && originalTimeStamp.isBefore(shiftstop)){
-                adjustedTimeStamp=shiftstop;
-                adjustmentType=PunchAdjustmentType.SHIFT_STOP;
-            }
-            //dock penalty round shiftstop the nearest 15 min interval directly under(this is to avoid having an issue where it will want to round up if it is just a minute behind the grace period but still close enough to want it to round up)
-            else if ((MINUTES.between(originalTimeStamp,shiftstop)>gracePeriod) && (MINUTES.between(originalTimeStamp,shiftstop)<roundInterval)){
-            adjustedTimeStamp=firstClockOutDock;
-            adjustmentType=PunchAdjustmentType.SHIFT_DOCK;
-            
-            }
-            //further interval round post the initial dock penalty(this is rounding down)
-            else if((originalTimeStamp.isBefore(firstClockOutDock)) && ((minutes % roundInterval)<(roundInterval/2))){
-                adjustedminute = Math.round(minutes / roundInterval) * roundInterval;
-                 shiftstop = originalTimeStamp.minusMinutes(adjustedminute);
-                
-            }
-            //further interval round post the initial dock penalty(this is rounding up)
-            else if((originalTimeStamp.isBefore(firstClockOutDock)) && ((minutes % roundInterval)>(roundInterval/2))){
-                adjustedminute = Math.round(minutes / roundInterval) * roundInterval;
-                 shiftstop = originalTimeStamp.plusMinutes(adjustedminute);
-                
-            }
-        }
+
     }
-        
+
     public int getId() {
         return id;
     }
@@ -162,7 +144,7 @@ public class Punch {
         s.append("#").append(badge.getId()).append(" ");
         s.append(punchType.toString()).append(": ");
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E MM/dd/yyyy HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MM/dd/yyyy HH:mm:ss");
         s.append(originalTimeStamp.format(formatter).toUpperCase());
 
         return s.toString();
@@ -176,7 +158,7 @@ public class Punch {
         s.append("#").append(badge.getId()).append(" ");
         s.append(punchType.toString()).append(": ");
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E MM/dd/yyyy HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MM/dd/yyyy HH:mm:ss");
         s.append(adjustedTimeStamp.format(formatter).toUpperCase());
         s.append(" (").append(adjustmentType).append(")");
 
