@@ -72,7 +72,6 @@ public class DepartmentDAO
             }
 
         }
-        System.err.println (department);
         return department;
 
     }
