@@ -199,18 +199,18 @@ public class PunchAdjustTest {
         ShiftDAO shiftDAO = daoFactory.getShiftDAO();
         Shift s1 = shiftDAO.find(1);
 
-        Punch p1 = punchDAO.find(172);
-        Punch p2 = punchDAO.find(834);
+        Punch p1 = punchDAO.find(1101);
+        Punch p2 = punchDAO.find(1153);
       
     /* Adjust Punches According to Shift Ruleset */ 
         p1.adjust(s1);
         p2.adjust(s1);
 
-        assertEquals("#D2C39273 CLOCK OUT: WED 08/01/2018 06:56:29", p1.printOriginal());
-        assertEquals("#D2C39273 CLOCK OUT: WED 08/01/2018 07:00:00 (Interval Round)", p1.printAdjusted());
+        assertEquals("#D2C39273 CLOCK IN: SAT 08/11/2018 05:59:01", p1.printOriginal());
+        assertEquals("#D2C39273 CLOCK IN: SAT 08/11/2018 06:00:00 (Round Interval)", p1.printAdjusted());
 
-        assertEquals("#D2C39273 CLOCK OUT: THU 08/09/2018 06:15:10", p2.printOriginal());
-        assertEquals("#D2C39273 CLOCK OUT: THU 08/09/2018 06:15:00 (Interval Round)", p2.printAdjusted()); 
+        assertEquals("#D2C39273 CLOCK OUT: SAT 08/11/2018 11:03:59", p2.printOriginal());
+        assertEquals("#D2C39273 CLOCK OUT: SAT 08/11/2018 11:00:00 (Interval Round)", p2.printAdjusted()); 
 
         
     }
