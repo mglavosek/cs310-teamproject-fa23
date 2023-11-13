@@ -1,8 +1,6 @@
 package edu.jsu.mcis.cs310.tas_fa23.dao;
 
-import edu.jsu.mcis.cs310.tas_fa23.Badge;
-import edu.jsu.mcis.cs310.tas_fa23.Punch;
-import edu.jsu.mcis.cs310.tas_fa23.EventType;
+import edu.jsu.mcis.cs310.tas_fa23.*;
 import java.time.LocalDateTime;
 import java.sql.*;
 import java.time.LocalDate;
@@ -15,6 +13,7 @@ public class PunchDAO {
     
    private static final String QUERY_FIND = "SELECT * FROM event WHERE id = ?";
    private static final String QUERY_FIND_LIST = "SELECT * FROM event WHERE badgeid = ? AND (timestamp LIKE ? OR timestamp LIKE ?) ORDER BY timestamp";
+   private static final String QUERY_CREATE = "INSERT INTO event (terminalid, badgeid, timestamp, eventtypeid) VALUES (?, ?, ?, ?)";
 
    private final DAOFactory daoFactory;
    
@@ -200,6 +199,79 @@ public class PunchDAO {
         return punchList;
     }
     
+    public int create(Punch punch)
+    {
+            
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        
+        int key = 0, result = 0;
+        int termID = punch.getTerminalId();
+        String badgeID = punch.getBadge().getId();
+        LocalDateTime ots = punch.getOriginalTimeStamp();
+        ots = ots.withNano(0);
+        EventType punchtype = punch.getPunchType();
+        
+        String timeString = ots.toString();
+        int punchType = punchtype.ordinal();    
+        
+        EmployeeDAO employeeDAO = daoFactory.getEmployeeDAO();
+        DepartmentDAO departmentDAO = daoFactory.getDepartmentDAO();
+        
+        Employee employee = employeeDAO.find(punch.getBadge());
+        Department department = departmentDAO.find(employee.getId());
+        
+        int departmentid = department.getId();
+        
+        //STILL NEEDS VERIFICATION
+        try 
+        {
+    
+            Connection conn = daoFactory.getConnection();
+                     
+            if (conn.isValid(0)) 
+            {
+                ps = conn.prepareStatement(QUERY_CREATE, PreparedStatement.RETURN_GENERATED_KEYS);
+                ps.setInt(1, termID);
+                ps.setString(2, badgeID);
+                ps.setString(3, timeString);
+                ps.setInt(4, punchType);
+  
+                //boolean hasresults = ps.execute();
+                result = ps.executeUpdate();
+
+                if (result == 1)
+                {
+                    rs = ps.getGeneratedKeys();
+                    if (rs.next())
+                    {
+                        key = rs.getInt(1);
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new DAOException(e.getMessage());
+        } finally {
+          if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    throw new DAOException(e.getMessage());
+                }
+            }
+          if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    throw new DAOException(e.getMessage());
+                }
+            }
+        }
+        return key;   //fix return value to return new punch ID if verified or 0 if otherwise.
+    
+    }
     
     
 }
