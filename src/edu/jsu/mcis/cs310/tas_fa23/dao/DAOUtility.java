@@ -8,6 +8,7 @@ import com.github.cliftonlabs.json_simple.*;
 import static edu.jsu.mcis.cs310.tas_fa23.EventType.*;
 import edu.jsu.mcis.cs310.tas_fa23.Punch;
 import edu.jsu.mcis.cs310.tas_fa23.Shift;
+import java.math.BigDecimal;
 
 /**
  * 
@@ -55,7 +56,7 @@ public final class DAOUtility {
             iter++;
             
             if(punchIn.getPunchType() == CLOCK_IN){
-                punchOut = punchIn = dailyPunchList.get(iter);
+                punchOut = dailyPunchList.get(iter);
                 iter++;
                 
                 if (punchOut.getPunchType() == CLOCK_OUT){
@@ -68,4 +69,21 @@ public final class DAOUtility {
         System.out.println(total);
         return total;
     }
-}
+    // Creating  Static CalculateAsenteeism Moudle
+   public static BigDecimal calculateAbsenteeism(ArrayList<Punch> punchlist, Shift s) {
+        int totalAccruedMinutes = calculateTotalMinutes(punchlist, s);
+        int totalScheduledMinutes = s.getTotalMinutes();
+
+        if (totalScheduledMinutes == 0) {
+            // Avoid division by zero
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal percentage = BigDecimal.valueOf(totalAccruedMinutes)
+                .divide(BigDecimal.valueOf(totalScheduledMinutes), 4, BigDecimal.ROUND_HALF_UP)
+                .multiply(BigDecimal.valueOf(100));
+
+        return percentage;
+    }
+} 
+  
