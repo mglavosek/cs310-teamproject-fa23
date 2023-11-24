@@ -69,21 +69,21 @@ public final class DAOUtility {
         System.out.println(total);
         return total;
     }
-    // Creating  Static CalculateAsenteeism Moudle
-   public static BigDecimal calculateAbsenteeism(ArrayList<Punch> punchlist, Shift s) {
-        int totalAccruedMinutes = calculateTotalMinutes(punchlist, s);
-        int totalScheduledMinutes = s.getTotalMinutes();
-
-        if (totalScheduledMinutes == 0) {
-            // Avoid division by zero
-            return BigDecimal.ZERO;
+    
+    
+    public static boolean isThereLunch(Punch punch){
+        boolean isALunch = false;
+        int list;
+        DAOFactory daoFactory = new DAOFactory("tas.jdbc");
+        
+        PunchDAO punchDao = daoFactory.getPunchDAO();
+        list = punchDao.list(punch.getBadge(), punch.getOriginalTimeStamp().toLocalDate()).size();
+        
+        if(list > 2){
+            isALunch = true;
         }
-
-        BigDecimal percentage = BigDecimal.valueOf(totalAccruedMinutes)
-                .divide(BigDecimal.valueOf(totalScheduledMinutes), 4, BigDecimal.ROUND_HALF_UP)
-                .multiply(BigDecimal.valueOf(100));
-
-        return percentage;
+        return isALunch;
     }
+   
 } 
   
