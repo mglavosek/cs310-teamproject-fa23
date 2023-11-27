@@ -51,6 +51,8 @@ public final class DAOUtility {
         Punch punchOut = null;
         int iter = 0;
         
+        
+        //Rework to deduct for lunch thresh AND don`t do stuff with timeouts
         while(iter < dailyPunchList.size()){
             punchIn = dailyPunchList.get(iter);
             iter++;

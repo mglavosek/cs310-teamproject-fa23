@@ -36,6 +36,7 @@ public class Punch {
 
     public void adjust(Shift s) {
         boolean isAdjusted = false;
+        boolean isWeekend = false;
         int SShiftRoundInt = s.getRoundInterval();
 
         //Main Flags
@@ -79,6 +80,12 @@ public class Punch {
         //throw error if still not adjusted
             //shouldn't happen
             
+            
+        if(originalTimeStamp.getDayOfWeek() == DayOfWeek.SATURDAY || originalTimeStamp.getDayOfWeek() == DayOfWeek.SUNDAY){
+            adjustmentType = NONE;
+            isAdjusted = true;
+            isWeekend = true;
+        }
             
         //check clock in
         if (isAdjusted == false && punchType == CLOCK_IN) {
@@ -124,7 +131,7 @@ public class Punch {
 
         //check whitespace evens
         //works only if round interval divides the minutes of an hour
-        if (isAdjusted == false && originalTimeStamp.getMinute() % s.getRoundInterval() == 0) {
+        if ((isAdjusted == false || isWeekend == true) && originalTimeStamp.getMinute() % s.getRoundInterval() == 0) {
             adjustedTimeStamp = originalTimeStamp.withSecond(0).withNano(0);
             isAdjusted = true;
             adjustmentType = NONE;
@@ -132,7 +139,7 @@ public class Punch {
 
         //check whitespace odds
         
-        if (isAdjusted == false) {
+        if (isAdjusted == false || isWeekend == true) {
             int roundMultiplier = originalTimeStamp.getMinute() / SShiftRoundInt; //get lower end of round, +1 is upper end
             LocalDateTime SShiftIntervalRound = originalTimeStamp.withMinute((SShiftRoundInt * roundMultiplier) + (SShiftRoundInt / 2));
             
