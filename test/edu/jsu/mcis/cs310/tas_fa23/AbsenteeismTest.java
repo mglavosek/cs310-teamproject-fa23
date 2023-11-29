@@ -54,7 +54,7 @@ public class AbsenteeismTest {
         
         /* Insert Absenteeism Into Database */
         
-        Absenteeism a1 = new Absenteeism(id, e, ts, percentage);
+        Absenteeism a1 = new Absenteeism(e, ts, percentage);
         absenteeismDAO.create(a1);
         
         /* Retrieve Absenteeism From Database */
@@ -101,7 +101,7 @@ public class AbsenteeismTest {
         
         /* Insert Absenteeism Into Database */
         
-        Absenteeism a1 = new Absenteeism(id, e, ts, percentage);
+        Absenteeism a1 = new Absenteeism(e, ts, percentage);
         absenteeismDAO.create(a1);
         
         /* Retrieve Absenteeism From Database */
@@ -148,7 +148,7 @@ public class AbsenteeismTest {
         
         /* Insert Absenteeism Into Database */
         
-        Absenteeism a1 = new Absenteeism(id, e, ts, percentage);
+        Absenteeism a1 = new Absenteeism(e, ts, percentage);
         absenteeismDAO.create(a1);
         
         /* Retrieve Absenteeism From Database */

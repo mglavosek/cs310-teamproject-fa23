@@ -54,6 +54,8 @@ public final class DAOFactory {
      }
      
      public AbsenteeismDAO getAbsenteismDAO(){
-         return new AbsenteeismDAO(getConnection());
+         return new AbsenteeismDAO(this);
      }
+
+
 }

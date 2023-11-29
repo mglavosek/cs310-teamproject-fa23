@@ -1,52 +1,45 @@
 package edu.jsu.mcis.cs310.tas_fa23;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+
+
 
 public class Absenteeism {
-    // Instance fields
-    private int id;
-    Employee employee;
-    LocalDate payPeriodStartDate;
-    BigDecimal absenteeismPercentage;
 
-    // Constructor
-   public Absenteeism(int id, Employee employee, LocalDate payPeriodStartDate, BigDecimal absenteeismPercentage) {
-        this.id = id;
-       this.employee = employee;
-        this.payPeriodStartDate = payPeriodStartDate;
-        this.absenteeismPercentage = absenteeismPercentage;
+    private final Employee employee;
+    private final LocalDate payPeriod;
+    private final BigDecimal absenteeismPercentage;
+
+    public Absenteeism(Employee employee, LocalDate payPeriod, BigDecimal absenteeismPercentage) {
+        this.employee = employee;
+        this.payPeriod = payPeriod.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
+        this.absenteeismPercentage = absenteeismPercentage.setScale(2, RoundingMode.HALF_UP);
     }
-    
 
-
-    // Accessor methods
-   
-   public int getId(){
-       return id; 
-   }
-   
-   public Employee getEmployee() {
+    public Employee getEmployee() {
         return employee;
     }
-  
 
-   public LocalDate getPayPeriodStartDate() {
-        return payPeriodStartDate;
+    public LocalDate getPayPeriod() {
+        return payPeriod;
     }
 
-   public BigDecimal getAbsenteeismPercentage() {
+    public BigDecimal getAbsenteeismPercentage() {
         return absenteeismPercentage;
     }
 
-    // Override toString method
     @Override
-   public String toString() {
-        return String.format("#%X (Pay Period Starting %s): %.2f%%", id, payPeriodStartDate, absenteeismPercentage);
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append("#").append(employee.getBadge().getId());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
+        str.append(" (Pay Period Starting ").append(payPeriod.format(formatter)).append("): ");
+        str.append(absenteeismPercentage).append("%");
+        return str.toString();
     }
-
-    public BigDecimal getPercentage() {
-        throw new UnsupportedOperationException("Not supported yet."); 
-    }
-
 }
