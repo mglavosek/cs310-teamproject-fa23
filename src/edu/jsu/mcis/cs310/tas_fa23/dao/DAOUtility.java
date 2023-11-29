@@ -27,14 +27,18 @@ public final class DAOUtility {
         for(Punch punch : dailyPunchList){
             
             HashMap<String,String> punchData = new HashMap<>();
+            //[{\"originaltimestamp\":\"FRI 09\\/07\\/2018 06:50:35\",\"badgeid\":\"28DC3FB8\",\"adjustedtimestamp\":\"FRI 09\\/07\\/2018 07:00:00\",\"adjustmenttype\":\"Shift Start\",\"terminalid\":\"104\",\"id\":\"3634\",\"punchtype\":\"CLOCK IN\"}
             
-            punchData.put("id", String.valueOf(punch.getId()));
-            punchData.put("badgeid", String.valueOf(punch.getBadge()));
-            punchData.put("terminalid", String.valueOf(punch.getTerminalId()));
-            punchData.put("punchtype", String.valueOf(punch.getPunchType()));
+            punchData.put("originaltimestamp", String.valueOf(punch.getOriginalTimeStamp().format(DateTimeFormatter.ofPattern("EEE MM/dd/yyyy HH:mm:ss")).toUpperCase()));
+            punchData.put("badgeid", String.valueOf(punch.getBadge().getId()));
+            punchData.put("adjustedtimestamp", String.valueOf(punch.getAdjustedTimeStamp().format(DateTimeFormatter.ofPattern("EEE MM/dd/yyyy HH:mm:ss")).toUpperCase()));
             punchData.put("adjustmenttype", String.valueOf(punch.getAdjustmentType()));
-            punchData.put("originaltimestamp", String.valueOf(punch.printOriginal()));
-            punchData.put("adjustedtimestamp", String.valueOf(punch.printAdjusted()));
+            punchData.put("terminalid", String.valueOf( punch.getTerminalId()));
+            punchData.put("id", String.valueOf(punch.getId()));
+            punchData.put("punchtype", String.valueOf(punch.getPunchType()));
+            
+            
+            
             
             jsonData.add(punchData);
         }
@@ -68,24 +72,15 @@ public final class DAOUtility {
             }
             
         }
+        
+        if(dailyPunchList.size() < 4 && total>shift.getLunchThreshhold()){
+            total -= ChronoUnit.MINUTES.between(shift.getLunchStart(), shift.getLunchStop());
+        }
+        
         System.out.println(total);
         return total;
     }
     
-    
-    public static boolean isThereLunch(Punch punch){
-        boolean isALunch = false;
-        int list;
-        DAOFactory daoFactory = new DAOFactory("tas.jdbc");
-        
-        PunchDAO punchDao = daoFactory.getPunchDAO();
-        list = punchDao.list(punch.getBadge(), punch.getOriginalTimeStamp().toLocalDate()).size();
-        
-        if(list > 2){
-            isALunch = true;
-        }
-        return isALunch;
-    }
  
 } 
   
