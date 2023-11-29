@@ -1,4 +1,5 @@
 package edu.jsu.mcis.cs310.tas_fa23;
+import java.util.zip.CRC32;
 
 public class Badge {
 
@@ -8,6 +9,12 @@ public class Badge {
         this.id = id;
         this.description = description;
     }
+    
+    //Constructor 2
+     public Badge(String description) {
+        this.description = description;
+        this.id = generateBadgeID(description);
+    }
 
     public String getId() {
         return id;
@@ -15,6 +22,14 @@ public class Badge {
 
     public String getDescription() {
         return description;
+    }
+    
+    private String generateBadgeID(String description) {
+        CRC32 newID = new CRC32();
+        newID.update(description.getBytes());
+        long checksum = newID.getValue();
+
+        return String.format("%08X", checksum);
     }
 
     @Override
