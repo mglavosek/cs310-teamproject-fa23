@@ -2,12 +2,9 @@ package edu.jsu.mcis.cs310.tas_fa23;
 
 import static edu.jsu.mcis.cs310.tas_fa23.EventType.*;
 import static edu.jsu.mcis.cs310.tas_fa23.PunchAdjustmentType.*;
-import edu.jsu.mcis.cs310.tas_fa23.Shift;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import static java.time.temporal.ChronoUnit.MINUTES;
 
 public class Punch {
 

@@ -1,6 +1,5 @@
 package edu.jsu.mcis.cs310.tas_fa23.dao;
 
-import java.time.*;
 import java.util.*;
 import java.time.temporal.ChronoUnit;
 import java.time.format.DateTimeFormatter;
@@ -8,7 +7,6 @@ import com.github.cliftonlabs.json_simple.*;
 import static edu.jsu.mcis.cs310.tas_fa23.EventType.*;
 import edu.jsu.mcis.cs310.tas_fa23.Punch;
 import edu.jsu.mcis.cs310.tas_fa23.Shift;
-import java.math.BigDecimal;
 
 /**
  * 
@@ -68,16 +66,12 @@ public final class DAOUtility {
                 if (punchOut.getPunchType() == CLOCK_OUT){
                     total += ChronoUnit.MINUTES.between(punchIn.getAdjustedTimeStamp(), punchOut.getAdjustedTimeStamp());
                 }
-                
             }
-            
         }
         
         if(dailyPunchList.size() < 4 && total>shift.getLunchThreshhold()){
             total -= ChronoUnit.MINUTES.between(shift.getLunchStart(), shift.getLunchStop());
         }
-        
-        System.out.println(total);
         return total;
     }
     
